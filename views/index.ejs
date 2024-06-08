@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina inicial</title>
+</head>
+<body>
+    <h1>The World Paper</h1>
+    <br>
+    <h2>Adicionados Recentemente:</h2>
+    <br>
+    <% if(dados && dados.length > 0) { %>
+        <ul>
+            <% for(var i = 0; i < dados.length; i++) { %>
+                <li><%= dados[i].titulo %></li>
+            <% } %>
+        </ul>
+    <% } else { %>
+        <p>Nenhum dados disponivel</p>
+    <% } %>
+</body>
+</html>
