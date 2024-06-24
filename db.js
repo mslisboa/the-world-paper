@@ -16,7 +16,21 @@ const selectAll = async () => {
 
     try {
         const [rows, fields] = await con.execute(
-            'SELECT * FROM artigo ORDER BY data_pub DESC LIMIT 5;'
+            `SELECT
+                a.doi,
+                a.titulo,
+                a.data_pub,
+                au.nome as nome_autor,
+                au.lattes
+            FROM
+                artigo a
+            JOIN
+                artigo_autor aa ON a.doi = aa.doi
+            JOIN
+                autor au ON aa.id_autor = au.id_autor
+            ORDER BY
+                data_pub DESC
+            LIMIT 5;`
         )
 
         console.log(rows)
@@ -32,9 +46,25 @@ const selectByTitle = async (name) => {
     const con = await conectar()
 
     try {
-        const [rows, fields] = await con.execute(
-            'SELECT * FROM artigo WHERE titulo LIKE ?;', [name]
-        )
+        const sql = `
+            SELECT
+                a.doi,
+                a.titulo,
+                a.data_pub,
+                au.nome as nome_autor,
+                au.lattes
+            FROM
+                artigo a
+            JOIN
+                artigo_autor aa ON a.doi = aa.doi
+            JOIN
+                autor au ON aa.id_autor = au.id_autor
+            WHERE
+                titulo LIKE ?
+            ORDER BY
+                data_pub DESC;
+            `
+        const [rows, fields] = await con.execute(sql, [`%${name}%`])
         
         console.log(rows)
         return rows

@@ -3,6 +3,8 @@ var app = express()
 const mysql = require('./db')
 const { rotas } = require('./routes')
 
+app.use(express.json()) // Permite tratar requisições com informações no formato JSON
+
 app.use(express.urlencoded({extended: false}))
 app.set("view engine", "ejs")
 
