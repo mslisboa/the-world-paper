@@ -8,15 +8,17 @@ rotas.get('/', async (req, res) => {
 })
 
 rotas.get('/:title', async (req, res) => {
-    const title = req.params.title;
+    const title = req.params.title
     const rows = await mysql.selectByTitle(title)
-    if(rows) {
-        res.status(200).send(rows)
-        return
-    }
 
-    res.status(404).send('Erro')
-    //res.render("index.ejs", {dados: rows})
+    res.render("index.ejs", {dados: rows})
+})
+
+rotas.get('/edit/:doi', async (req, res) => {
+    const doi = req.params.doi
+    const rows = await mysql.selectByDoi(doi)
+
+    res.render("edit.ejs", {dados: rows})
 })
 
 module.exports = {rotas}
