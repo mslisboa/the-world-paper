@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Artigo</title>
+</head>
+<body>
+    <h1>Inserir Artigo</h1>
+    <form id="artigoForm">
+        <label for="doi">DOI:</label>
+        <input type="text" id="doi" name="doi" required><br>
+
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" required><br>
+
+        <label for="abstract">Abstract:</label>
+        <input type="text" id="abstract" name="abstract" required><br>
+
+        <label for="id_revista">ID Revista:</label>
+        <input type="number" id="id_revista" name="id_revista" required><br>
+
+        <label for="data_pub">Data de Publicação:</label>
+        <input type="date" id="data_pub" name="data_pub" required><br>
+
+        <!-- Aqui você pode adicionar campos para autores, afiliações e palavras-chave -->
+        <!-- Este é apenas um exemplo básico -->
+        
+        <button type="submit">Inserir Artigo</button>
+    </form>
+
+    <script>
+        document.getElementById('artigoForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {
+                doi: formData.get('doi'),
+                titulo: formData.get('titulo'),
+                abstract: formData.get('abstract'),
+                id_revista: formData.get('id_revista'),
+                data_pub: formData.get('data_pub'),
+                autores: [
+                    {
+                        id_autor: 1,
+                        nome: 'Nome do Autor',
+                        area_atuacao: 'Área de Atuação',
+                        lattes: 'http://lattes.cnpq.br/1234567890123456',
+                        tipo_contribuicao: 'Principal',
+                        porcentagem_contribuicao: 100,
+                        ordem_autoria: 1
+                    }
+                ],
+                afiliacoes: [
+                    {
+                        id_afiliacao: 1,
+                        nome: 'Nome da Instituição',
+                        endereco: 'Endereço da Instituição',
+                        id_autor: 1
+                    }
+                ],
+                palavras_chave: [
+                    {
+                        id_palavra: 1,
+                        palavra: 'Ciência de Dados'
+                    }
+                ]
+            };
+
+            const response = await fetch('/add/insert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.text();
+            alert(result);
+        });
+    </script>
+</body>
+</html>

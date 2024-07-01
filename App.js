@@ -11,6 +11,7 @@ app.set("view engine", "ejs")
 app.use('/', rotas)
 app.use('/:title', rotas)
 app.use('/edit/:doi', rotas)
+app.use('/add/insert', rotas)
 
 app.listen(3000, () => {
     console.log('SERVIDOR ATIVO, ACESSE http://localhost:3000')
