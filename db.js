@@ -30,7 +30,7 @@ const selectAll = async () => {
                 autor au ON aa.id_autor = au.id_autor
             ORDER BY
                 data_pub DESC
-            LIMIT 6;`
+            LIMIT 10;`
         )
 
         console.log(rows)
@@ -194,4 +194,133 @@ const insertArticle = async (data) => {
     }
 }
 
-module.exports = {selectAll, selectByTitle, selectByDoi, insertArticle}
+const deleteByDoi = async (doi) => {  
+    let con = await conectar()
+
+    try {
+        await con.beginTransaction()
+
+        // Exclui as referências nas tabelas de junção
+        await con.execute('DELETE FROM artigo_autor WHERE doi LIKE ?', [`${doi}%`])
+        await con.execute('DELETE FROM artigo_palavra_chave WHERE doi LIKE ?', [`${doi}%`])
+        
+        // Exclui o artigo da tabela principal
+        await con.execute('DELETE FROM artigo WHERE doi LIKE ?', [`${doi}%`])
+
+        // Exclui referências órfãs na tabela de junção autor_afiliacao
+        await con.execute('DELETE FROM autor_afiliacao WHERE id_autor NOT IN (SELECT id_autor FROM artigo_autor)');
+
+        // Exclui autores que não estão mais associados a nenhum artigo
+        await con.execute('DELETE FROM autor WHERE id_autor NOT IN (SELECT id_autor FROM artigo_autor)');
+
+        // Exclui afiliações que não estão mais associadas a nenhum autor
+        await con.execute('DELETE FROM afiliacao WHERE id_afiliacao NOT IN (SELECT id_afiliacao FROM autor_afiliacao)');
+
+        // Exclui palavras-chave que não estão mais associadas a nenhum artigo
+        await con.execute('DELETE FROM palavra_chave WHERE id_palavra NOT IN (SELECT id_palavra FROM artigo_palavra_chave)');
+        
+        await con.commit()
+
+        console.log('Deu certo')
+    } catch (error) {
+        console.log('Deu errado: ', error)
+    }
+
+    await con.end()
+}
+
+const updateArticle = async (dados) => {
+    const autores = dados.autores
+    const afiliacao = dados.afiliacao
+    const palavras_chave = dados.palavras_chave
+    var autorId = undefined
+    let con
+
+    try {
+        con = await conectar();
+
+        // Começa uma transação
+        await con.beginTransaction();
+
+        // Atualiza o artigo
+        await con.execute(`
+            UPDATE artigo
+            SET titulo = ?, abstract = ?, data_pub = ?, id_revista = ?
+            WHERE doi = ?
+        `, [dados.titulo, dados.abstract, dados.data_pub, dados.id_revista, `${dados.doi}%`]);
+
+        // Atualiza as tabelas de junção
+        // Exclui as entradas antigas nas tabelas de junção
+        await con.execute('DELETE FROM artigo_autor WHERE doi = ?', [`${dados.doi}%`]);
+        await con.execute('DELETE FROM artigo_palavra_chave WHERE doi = ?', [`${dados.doi}%`]);
+
+        // Insere novas entradas nas tabelas de junção
+        for (const autor of autores) {
+            const [result] = await con.execute(`
+                INSERT INTO autor (nome, area_atuacao, lattes)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE nome = VALUES(nome), area_atuacao = VALUES(area_atuacao), lattes = VALUES(lattes)
+            `, [autor.nome, autor.area_atuacao, autor.lattes]);
+
+            autorId = result.insertId || (await con.execute('SELECT id_autor FROM autor WHERE lattes = ?', [autor.lattes]))[0][0].id_autor;
+
+            await con.execute(`
+                INSERT INTO artigo_autor (doi, id_autor, tipo_contribuicao, porcentagem_contribuicao, ordem_autoria)
+                VALUES (?, ?, ?, ?, ?)
+            `, [dados.doi, autorId, autor.tipo_contribuicao, autor.porcentagem_contribuicao, autor.ordem_autoria]);
+        }
+
+        for (const aff of afiliacao) {
+            const [result] = await con.execute(`
+                INSERT INTO afiliacao (nome, endereco)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE nome = VALUES(nome), endereco = VALUES(endereco)
+            `, [aff.nome, aff.endereco]);
+
+            const afiliacaoId = result.insertId || (await con.execute('SELECT id_afiliacao FROM afiliacao WHERE nome = ?', [aff.nome]))[0][0].id_afiliacao;
+
+            await con.execute(`
+                INSERT INTO autor_afiliacao (id_autor, id_afiliacao)
+                VALUES (?, ?)
+            `, [autorId, afiliacaoId]);
+        }
+
+        for (const palavra of palavras_chave) {
+            const [result] = await con.execute(`
+                INSERT INTO palavra_chave (palavra)
+                VALUES (?)
+                ON DUPLICATE KEY UPDATE palavra = VALUES(palavra)
+            `, [palavra]);
+
+            const palavraId = result.insertId || (await con.execute('SELECT id_palavra FROM palavra_chave WHERE palavra = ?', [palavra]))[0][0].id_palavra;
+
+            await con.execute(`
+                INSERT INTO artigo_palavra_chave (doi, id_palavra)
+                VALUES (?, ?)
+            `, [dados.doi, palavraId]);
+        }
+
+        // Comita a transação
+        await con.commit();
+        console.log('Artigo atualizado com sucesso.');
+
+        // Fecha a conexão
+        await con.end();
+    } catch (error) {
+        console.error('Erro ao atualizar o artigo:', error);
+        if (con) {
+            await con.rollback();
+            await con.end();
+        }
+        throw error;
+    }
+}
+
+module.exports = {
+    selectAll,
+    selectByTitle,
+    selectByDoi,
+    insertArticle,
+    deleteByDoi,
+    updateArticle
+}

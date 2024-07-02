@@ -28,6 +28,10 @@ rotas.get('/delete/:doi', async (req, res) => {
     res.render("delete.ejs", {dados: rows})
 })
 
+rotas.get('/add/article', (req, res) => {
+    res.render("add.ejs")
+})
+
 rotas.post('/add/insert', async (req, res) => {
     const data = req.body
     const message = await mysql.insertArticle(data)
@@ -42,6 +46,20 @@ rotas.post('/add/insert', async (req, res) => {
             res.redirect('/')
         }, 3000)
     }
+})
+
+rotas.delete('/delete/del/:doi', async (req, res) => {
+    const doi = req.params.doi
+    await mysql.deleteByDoi(doi)
+
+    res.status(200).send('Fim')
+})
+
+rotas.put('/edit/update', async (req, res) => {
+    const dados = req.body
+    await mysql.updateArticle(dados)
+
+    res.status(200).send('Fim')
 })
 
 module.exports = {rotas}
