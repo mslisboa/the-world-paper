@@ -46,28 +46,76 @@ const selectByTitle = async (name) => {
     const con = await conectar()
 
     try {
-        const sql = `
-            SELECT
-                a.doi,
-                a.titulo,
-                a.data_pub,
-                au.nome as nome_autor,
-                au.lattes
-            FROM
-                artigo a
-            JOIN
-                artigo_autor aa ON a.doi = aa.doi
-            JOIN
-                autor au ON aa.id_autor = au.id_autor
-            WHERE
-                titulo LIKE ?
-            ORDER BY
-                data_pub DESC;
-            `
-        const [rows, fields] = await con.execute(sql, [`%${name}%`])
-        
-        console.log(rows)
-        return rows
+        if(typeof name === "string") {
+            const sql = `
+                SELECT
+                    a.doi,
+                    a.titulo,
+                    a.data_pub,
+                    au.nome as nome_autor,
+                    au.lattes
+                FROM
+                    artigo a
+                JOIN
+                    artigo_autor aa ON a.doi = aa.doi
+                JOIN
+                    autor au ON aa.id_autor = au.id_autor
+                WHERE
+                    titulo LIKE ?
+                ORDER BY
+                    data_pub DESC;
+                `
+            const [rows, fields] = await con.execute(sql, [`%${name}%`])
+            
+            console.log(rows)
+            return rows
+        } else {
+            var sql = `
+                SELECT
+                    a.doi,
+                    a.titulo,
+                    a.data_pub,
+                    au.nome as nome_autor,
+                    au.lattes
+                FROM
+                    artigo a
+                JOIN
+                    artigo_autor aa ON a.doi = aa.doi
+                JOIN
+                    autor au ON aa.id_autor = au.id_autor
+                `
+            switch (name) {
+                case 1:
+                    sql += `
+                        ORDER BY
+                            a.titulo;
+                    `
+                    console.log(sql)
+
+                    const [rows_titulo, fields_titulo] = await con.execute(sql)
+
+                    console.log(rows_titulo)
+                    return rows_titulo
+
+                case 2:
+                    sql += `
+                        ORDER BY
+                            au.nome;
+                    `
+                    const [rows_nome, fields_nome] = await con.execute(sql)
+                    console.log(rows_nome)
+                    return rows_nome
+            
+                default:
+                    sql += `
+                        ORDER BY
+                            data_pub DESC;
+                    `
+                    const [rows_data, fields_data] = await con.execute(sql)
+                    console.log(rows_data)
+                    return rows_data
+            }
+        }        
     } catch (error) {
         console.log(
             'Erro ao realizar a consulta SELECT pelo titulo: ',
@@ -221,12 +269,12 @@ const deleteByDoi = async (doi) => {
         
         await con.commit()
 
-        console.log('Deu certo')
+        return 'Deu certo'
     } catch (error) {
-        console.log('Deu errado: ', error)
+        return 'Deu errado: ' + error
+    } finally {
+        await con.end()
     }
-
-    await con.end()
 }
 
 const updateArticle = async (dados) => {
@@ -234,11 +282,9 @@ const updateArticle = async (dados) => {
     const afiliacao = dados.afiliacao
     const palavras_chave = dados.palavras_chave
     var autorId = undefined
-    let con
+    const con = await conectar();
 
     try {
-        con = await conectar();
-
         // Começa uma transação
         await con.beginTransaction();
 
@@ -247,12 +293,12 @@ const updateArticle = async (dados) => {
             UPDATE artigo
             SET titulo = ?, abstract = ?, data_pub = ?, id_revista = ?
             WHERE doi = ?
-        `, [dados.titulo, dados.abstract, dados.data_pub, dados.id_revista, `${dados.doi}%`]);
+        `, [dados.titulo, dados.abstract, dados.data_pub, dados.id_revista, dados.doi]);
 
         // Atualiza as tabelas de junção
         // Exclui as entradas antigas nas tabelas de junção
-        await con.execute('DELETE FROM artigo_autor WHERE doi = ?', [`${dados.doi}%`]);
-        await con.execute('DELETE FROM artigo_palavra_chave WHERE doi = ?', [`${dados.doi}%`]);
+        await con.execute('DELETE FROM artigo_autor WHERE doi = ?', [dados.doi]);
+        await con.execute('DELETE FROM artigo_palavra_chave WHERE doi = ?', [dados.doi]);
 
         // Insere novas entradas nas tabelas de junção
         for (const autor of autores) {
@@ -302,17 +348,11 @@ const updateArticle = async (dados) => {
 
         // Comita a transação
         await con.commit();
-        console.log('Artigo atualizado com sucesso.');
-
-        // Fecha a conexão
-        await con.end();
+        return 'Deu Certo'
     } catch (error) {
-        console.error('Erro ao atualizar o artigo:', error);
-        if (con) {
-            await con.rollback();
-            await con.end();
-        }
-        throw error;
+        return error
+    } finally {
+        await con.end()
     }
 }
 

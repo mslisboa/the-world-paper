@@ -10,6 +10,7 @@ app.set("view engine", "ejs")
 
 app.use('/', rotas)
 app.use('/:title', rotas)
+app.use('/article', rotas)
 app.use('/edit/:doi', rotas)
 app.use('/delete/:doi', rotas)
 app.use('/add/article', rotas)
