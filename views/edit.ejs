@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Artigo</title>
+</head>
+<body>
+    <h1>Inserir Artigo</h1>
+    <form id="artigoForm">
+        <label for="doi">DOI:</label>
+        <input type="text" id="doi" name="doi" required value="<%= dados[0].doi %>"><br>
+
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" required value="<%= dados[0].titulo %>"><br>
+
+        <label for="abstract">Abstract:</label><br>
+        <textarea id="abstract" name="abstract" rows="4" cols="50" required><%= dados[0].abstract %></textarea><br><br>
+
+        <label for="id_revista">Nome da Revista:</label><br>
+        <select id="id_revista" name="id_revista" required>
+            <option value="1">Nature</option>
+            <option value="2">IEEE Transactions on Engineering</option>
+            <option value="3">American Journal of Sociology</option>
+            <option value="4">The Lancet</option>
+            <option value="5">Journal of Art and Design</option>
+        </select><br><br>
+        
+        <label for="data_pub">Data:</label><br>
+        <input type="text" id="data_pub" name="data_pub" required value="<%= dados[0].data_pub %>"><br><br>
+
+        <label for="nome">Nome do Autor:</label><br>
+        <input type="text" id="nome" name="nome" required value="<%= dados[0].autor_nome %>"><br><br>
+
+        <label for="area_atuacao">Área de Atuação:</label><br>
+        <input type="text" id="area_atuacao" name="area_atuacao" required value="<%= dados[0].area_atuacao %>"><br><br>
+        
+        <label for="lattes">Link do Lattes:</label><br>
+        <input type="text" id="lattes" name="lattes" required value="<%= dados[0].lattes %>"><br><br>
+
+        <label for="tipo_contribuicao">Tipo de Contribuição:</label><br>
+        <input type="text" id="tipo_contribuicao" name="tipo_contribuicao" required value="<%= dados[0].tipo_contribuicao %>"><br><br>
+
+        <label for="porcentagem_contribuicao">Porcentagem de Contribuição:</label><br>
+        <input type="number" id="porcentagem_contribuicao" name="porcentagem_contribuicao" min="2" max="5" required value="<%= dados[0].porcentagem_contribuicao%>"><br><br>
+ 
+        <label for="ordem_autoria">Ordem de Autorias:</label><br>
+        <input type="number" id="ordem_autoria" name="ordem_autoria" required value="<%= dados[0].ordem_autoria%>"><br><br>
+       
+        <label for="universidade">Nome da Universidade:</label><br>
+        <input type="text" id="universidade" name="universidade" required value="<%= dados[0].afiliacao_nome %>"><br><br>
+
+        <label for="endereco">Endereço da Pesquisa:</label><br>
+        <input type="text" id="endereco" name="endereco" required value="<%= dados[0].endereco %>"><br><br>
+    
+        <label for="palavra">Palavras-chave:</label><br>
+        <input type="text" id="palavra" name="palavra" required value="<%= dados[0].palavras_chave %>"><br><br>
+        
+        <button type="submit">Atualizar</button>
+    </form>
+
+    <script>
+        document.getElementById('artigoForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {
+                doi: formData.get('doi'),
+                titulo: formData.get('titulo'),
+                abstract: formData.get('abstract'),
+                id_revista: formData.get('id_revista'),
+                data_pub: formData.get('data_pub'),
+                autores: [
+                    {
+                        nome: formData.get('nome'),
+                        area_atuacao: formData.get('area_atuacao'),
+                        lattes: formData.get('area_atuacao'),
+                        tipo_contribuicao: formData.get('tipo_contribuicao'),
+                        porcentagem_contribuicao: formData.get('porcentagem_contribuicao'),
+                        ordem_autoria: formData.get('ordem_autoria')
+                    }
+                ],
+                afiliacao: [
+                    {
+                        nome: formData.get('universidade'),
+                        endereco: formData.get('endereco')
+                    }
+                ],
+                palavras_chave: [
+                    {
+                        palavra: formData.get('palavra')
+                    }
+                ]
+            };
+
+            const response = await fetch('/edit/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.text();
+            alert(result);
+        });
+    </script>
+</body>
+</html>

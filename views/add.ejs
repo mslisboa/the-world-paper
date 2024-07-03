@@ -14,17 +14,47 @@
         <label for="titulo">Título:</label>
         <input type="text" id="titulo" name="titulo" required><br>
 
-        <label for="abstract">Abstract:</label>
-        <input type="text" id="abstract" name="abstract" required><br>
+        <label for="abstract">Abstract:</label><br>
+        <textarea id="abstract" name="abstract" rows="4" cols="50" required></textarea><br><br>
 
-        <label for="id_revista">ID Revista:</label>
-        <input type="number" id="id_revista" name="id_revista" required><br>
+        <label for="id_revista">Nome da Revista:</label><br>
+        <select id="id_revista" name="id_revista" required>
+            <option value="1">Nature</option>
+            <option value="2">IEEE Transactions on Engineering</option>
+            <option value="3">American Journal of Sociology</option>
+            <option value="4">The Lancet</option>
+            <option value="5">Journal of Art and Design</option>
+        </select><br><br>
+        
+        <label for="data_pub">Data:</label><br>
+        <input type="text" id="data_pub" name="data_pub" required><br><br>
 
-        <label for="data_pub">Data de Publicação:</label>
-        <input type="date" id="data_pub" name="data_pub" required><br>
+        <label for="nome">Nome do Autor:</label><br>
+        <input type="text" id="nome" name="nome" required><br><br>
 
-        <!-- Aqui você pode adicionar campos para autores, afiliações e palavras-chave -->
-        <!-- Este é apenas um exemplo básico -->
+        <label for="area_atuacao">Área de Atuação:</label><br>
+        <input type="text" id="area_atuacao" name="area_atuacao" required><br><br>
+        
+        <label for="lattes">Link do Lattes:</label><br>
+        <input type="text" id="lattes" name="lattes" required><br><br>
+
+        <label for="tipo_contribuicao">Tipo de Contribuição:</label><br>
+        <input type="text" id="tipo_contribuicao" name="tipo_contribuicao" required><br><br>
+
+        <label for="porcentagem_contribuicao">Porcentagem de Contribuição:</label><br>
+        <input type="number" id="porcentagem_contribuicao" name="porcentagem_contribuicao" min="2" max="5" required><br><br>
+ 
+        <label for="ordem_autoria">Ordem de Autorias:</label><br>
+        <input type="number" id="ordem_autoria" name="ordem_autoria" required><br><br>
+       
+        <label for="universidade">Nome da Universidade:</label><br>
+        <input type="text" id="universidade" name="universidade" required><br><br>
+
+        <label for="endereco">Endereço da Pesquisa:</label><br>
+        <input type="text" id="endereco" name="endereco" required><br><br>
+    
+        <label for="palavra">Palavras-chave:</label><br>
+        <input type="text" id="palavra" name="palavra" required><br><br>
         
         <button type="submit">Inserir Artigo</button>
     </form>
@@ -42,27 +72,23 @@
                 data_pub: formData.get('data_pub'),
                 autores: [
                     {
-                        id_autor: 1,
-                        nome: 'Nome do Autor',
-                        area_atuacao: 'Área de Atuação',
-                        lattes: 'http://lattes.cnpq.br/1234567890123456',
-                        tipo_contribuicao: 'Principal',
-                        porcentagem_contribuicao: 100,
-                        ordem_autoria: 1
+                        nome: formData.get('nome'),
+                        area_atuacao: formData.get('area_atuacao'),
+                        lattes: formData.get('area_atuacao'),
+                        tipo_contribuicao: formData.get('tipo_contribuicao'),
+                        porcentagem_contribuicao: formData.get('porcentagem_contribuicao'),
+                        ordem_autoria: formData.get('ordem_autoria')
                     }
                 ],
-                afiliacoes: [
+                afiliacao: [
                     {
-                        id_afiliacao: 1,
-                        nome: 'Nome da Instituição',
-                        endereco: 'Endereço da Instituição',
-                        id_autor: 1
+                        nome: formData.get('universidade'),
+                        endereco: formData.get('endereco')
                     }
                 ],
                 palavras_chave: [
                     {
-                        id_palavra: 1,
-                        palavra: 'Ciência de Dados'
+                        palavra: formData.get('palavra')
                     }
                 ]
             };

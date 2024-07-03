@@ -30,6 +30,7 @@ rotas.get('/edit/:doi', async (req, res) => {
     const doi = req.params.doi
     const rows = await mysql.selectByDoi(doi)
 
+    console.log(rows)
     res.render("edit.ejs", {dados: rows})
 })
 
@@ -49,14 +50,9 @@ rotas.post('/add/insert', async (req, res) => {
     const message = await mysql.insertArticle(data)
 
     if(message === 'Deu certo') {
-        res.status(200).redirect('/')
+        res.status(200)
     } else {
-        res.status(500).send('Falha na tentativa de inserção. Redirecionando para a página inicial...')
-
-        // Redireciona para a página inicial após 3 segundos
-        setTimeout(() => {
-            res.redirect('/')
-        }, 3000)
+        res.status(500).send(message)
     }
 })
 

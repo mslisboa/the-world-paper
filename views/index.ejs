@@ -3,21 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="index.css" media="screen">
     <title>Pagina inicial</title>
 </head>
 <body>
-    <h1>The World Paper</h1>
-    <br>
-    <h2>Adicionados Recentemente:</h2>
-    <br>
+    <div>
+        <h1 id="titulo">The World Paper</h1>
+        <br>
+    </div>
+    <div 
+        class="campo">
+        <input type="text" name="nome" id="nome" required>
+    <br>    
+    <div>
+        <a href="add/article" target="_blank">
+            <button>NOVO ARTIGO</button>
+        </a>
+    </div>
+   
     <% if(dados && dados.length > 0) { %>
         <ul>
             <% for(var i = 0; i < dados.length; i++) { %>
-                <li><%= dados[i].titulo %></li>
-            <% } %>
+                <li><%= dados[i].titulo %>
+                    
+                    <a href="/edit/<%= dados[i].doi.substring(0, 7); %>" class="B-EDITAR">EDITAR</a>
+                    <a href="/delete/<%= dados[i].doi.substring(0, 7); %>" class="B-DELETE">DELETE</a>
+                </li>            
+                <li><%= new Date(dados[i].data_pub).toLocaleDateString() %> <%= "(" + dados[i].nome_autor + ")" %></li>
+                <br>
+            <% } %>     
         </ul>
     <% } else { %>
         <p>Nenhum dados disponivel</p>
     <% } %>
+   </div>
 </body>
 </html>

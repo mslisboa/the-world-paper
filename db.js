@@ -132,6 +132,7 @@ const selectByDoi = async (doi) => {
     try {
         const sql = `
         SELECT
+            a.doi,
             a.titulo,
             a.abstract,
             a.data_pub,
@@ -164,7 +165,7 @@ const selectByDoi = async (doi) => {
         WHERE
             a.doi LIKE ?
         GROUP BY 
-			a.titulo, a.abstract, a.data_pub, au.nome, au.area_atuacao, au.lattes, aa.tipo_contribuicao, 
+			a.doi, a.titulo, a.abstract, a.data_pub, au.nome, au.area_atuacao, au.lattes, aa.tipo_contribuicao, 
 			aa.porcentagem_contribuicao, aa.ordem_autoria, af.nome, af.endereco;
         `
 
